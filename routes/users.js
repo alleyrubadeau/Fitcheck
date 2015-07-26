@@ -2,11 +2,19 @@ var express = require('express');
 var router = express.Router();
 var db = require('monk')(process.env.MONGOLAB_URI)
 var fitcheck = db.get('fitcheck')
+var cookieSession = require('cookie-session')
+
 
 var users = db.get('users')
 var bcrypt = require('bcrypt')
 var session = require('express-session')
 var app = require('express')()
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['SECRET1', 'SECRET2']
+}));
+
 
 router.get('/', function(req, res, next) {
   users.find({}, function (err, docs) {
@@ -14,6 +22,19 @@ router.get('/', function(req, res, next) {
     res.render('index', {users: docs});
   })
 });
+
+router.get('/new', function(req, res, next) {
+  res.render('users/new', { title: 'Express' });
+});
+
+router.post('/', function(req,res) {
+ var user = req.body;
+ users.insert(gif, function(err, doc) {
+   if (err) return err;
+   res.redirect('/');
+ });
+});
+
 
 
 
@@ -39,17 +60,19 @@ router.post('/register', function (req, res) {
     users.insert(req.body, function (err, doc) {
       })
     }
-      // users.find({email: req.body.email}, function (err, doc) {
-      //   if(docs.length === 0) {
-      //     req.body.password=bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10))
-      //   users.insert(req.body, function (err, docs) {
-      //     if (err) res.render('error') {
-      //     req.session.id=doc._id
-      //     res.redirect('/', {error: 'email already exists'})
-      //       }
-      //     })
-      //   }
-      // }
+      users.find({email: req.body.email}, function (err, doc) {
+        if(docs.length === 0) {
+          req.body.password=bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10))
+
+        users.insert(req.body, function (err, docs) {
+          if (error){
+          res.render('error')
+          req.session.id=doc._id
+          res.redirect('/', {error: 'email already exists'})
+            }
+          })
+        }
+      })
   })
 
 
