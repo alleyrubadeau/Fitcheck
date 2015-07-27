@@ -73,7 +73,7 @@ app.get('/auth/fitbit', function (req, res) {
     if (err) {
       res.redirect('/')
       // Take action
-      return;
+      // return;
     }
 
     req.session.oauth = {
@@ -138,6 +138,12 @@ app.get('/auth/fitbit',
     app.use('/', routes);
     app.use('/', users);
 
+    app.use('/users/:id', function (req, res) {
+      res.send('user', + req.params.id)
+    })
+    app.use('/stats', function (req, res) {
+      res.render('stats', {user: req.user})
+    })
 
 
 app.get('/account', ensureAuthenticated, function(req, res){
@@ -145,36 +151,16 @@ app.get('/account', ensureAuthenticated, function(req, res){
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-app.get('/stats', function (req, res) {
+app.get('/:id/stats', function (req, res) {
   client = new Fitbit(
-      process.env.KEY
-    , process.env.SECRET
-    , { // Now set with access tokens
-          accessToken: req.session.oauth.accessToken
-        , accessTokenSecret: req.session.oauth.accessTokenSecret
-        , unitMeasure: 'en_GB'
-      }
-  );
-
-  // Fetch todays activities
+        process.env.KEY
+      , process.SECRET
+      , { // Now set with access tokens
+            accessToken: req.session.oauth.accessToken
+          , accessTokenSecret: req.session.oauth.accessTokenSecret
+          , unitMeasure: 'en_GB'
+        }
+    );  // Fetch todays activities
   client.getActivities(function (err, activities) {
     if (err) {
       // Take action
@@ -247,6 +233,24 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   res.redirect('/login')
 }
+
+
+
+
+// var client = new Fitbit(process.env.KEY, process.env.SECRET);
+//
+// client.getRequestToken(function (err, token, tokenSecret) {
+//   if (err) {
+//     res.redirect('/')
+//     // Take action
+//     // return;
+//   }
+//
+//   req.session.oauth = {
+//       requestToken: token
+//     , requestTokenSecret: tokenSecret
+//   };
+//   res.redirect(client.authorizeUrl(token));
 
 
 module.exports = app;
