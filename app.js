@@ -50,11 +50,17 @@ passport.use(new FitbitStrategy({
     consumerKey: process.env.KEY,
     consumerSecret: process.env.SECRET,
     callbackURL: process.env.HOST,
+    scope: ['r_emailaddress', 'r_basicprofile'],
     state: true
   },
   function(token, tokenSecret, profile, done) {
-    User.findOrCreate({ fitbitId: profile.id }, function (err, user) {
-      return done(err, user)
+    console.log(profile)
+    // User.findOrCreate({ fitbitId: profile.id }, function (err, user) {
+      return done(null, {
+      id: profile.id,
+      displayName: profile.displayName,
+      // photo: profile.photos[0],
+      token: accessToken
     });
   }
 ));
