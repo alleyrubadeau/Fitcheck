@@ -50,36 +50,27 @@ passport.use(new FitbitStrategy({
     callbackURL: process.env.HOST,
   },
   function(token, tokenSecret, profile, done) {
-    // asynchronous verification, for effect...
     process.nextTick(function () {
 
-      // To keep the example simple, the user's Fitbit profile is returned to
-      // represent the logged-in user.  In a typical application, you would want
-      // to associate the Fitbit account with a user record in your database,
-      // and return that user instead.
       console.log(profile);
+
       return done(null, profile);
     });
   }
 ));
 
+
 app.get('/auth/fitbit',
   passport.authenticate('fitbit'),
   function(req, res){
-    // The request will be redirected to Fitbit for authentication, so this
-    // function will not be called.
   });
 
-// GET /auth/fitbit/callback
-//   Use passport.authenticate() as route middleware to authenticate the
-//   request.  If authentication fails, the user will be redirected back to the
-//   login page.  Otherwise, the primary route function function will be called,
-//   which, in this example, will redirect the user to the home page.
 app.get('/auth/fitbit/callback',
   passport.authenticate('fitbit', { failureRedirect: '/login' }),
   function(req, res) {
     res.redirect('/');
   });
+
 
 
 app.use(function (req, res, next) {
@@ -89,7 +80,6 @@ app.use(function (req, res, next) {
 
 app.use('/', routes);
 app.use('/:id', function (req, res) {
-  // res.send('user', + req.params.id)
   res.send('user' + req.params.id + 'Total steps today: ');
 })
 
@@ -101,22 +91,19 @@ app.get('/styleguide', function (req, res) {
   res.render('styleguide')
 })
 
-app.get('/', function(req, res){
-  res.render('index', { user: req.user });
+app.get('/', function(req, res, next) {
+  res.render('index', {
+    title: 'Express',
+    user: req.user
+  });
 });
 
-
-// catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-// error handlers
-
-// development error handler
-// will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
@@ -127,8 +114,6 @@ if (app.get('env') === 'development') {
   });
 }
 
-// production error handler
-// no stacktraces leaked to user
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
