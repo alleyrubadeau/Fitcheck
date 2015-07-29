@@ -7,6 +7,7 @@ var resources = {
   , Devices: require('./resources/devices')
   , Sleep: require('./resources/sleep')
   , Foods: require('./resources/foods')
+  , Logic: require('./resources/logic')
 };
 // Includes all body resource Models
 _.extend(resources, require('./resources/body'));

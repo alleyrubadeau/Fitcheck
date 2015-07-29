@@ -1,3 +1,5 @@
+
+
 require('dotenv').load()
 var session = require('express-session');
 var bcrypt = require('bcrypt')
@@ -7,7 +9,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var Fitbit = require('fitbit')
+var Fitbit = require('fitbit');
+var request = require('ajax-request');
+
+
+var userPro;
+
 
 
 var routes = require('./routes/index');
@@ -15,17 +22,15 @@ var passport = require('passport')
 var FitbitStrategy = require('passport-fitbit').Strategy
 
 
+
 var app = express();
 
-// view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
-app.set('trust proxy', 1); // trust first proxy
+app.set('trust proxy', 1);
 
 
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -44,6 +49,8 @@ passport.deserializeUser(function(obj, done) {
   done(null, obj);
 });
 
+var accessTokens = {}
+
 passport.use(new FitbitStrategy({
     consumerKey: process.env.KEY,
     consumerSecret: process.env.SECRET,
@@ -51,13 +58,53 @@ passport.use(new FitbitStrategy({
   },
   function(token, tokenSecret, profile, done) {
     process.nextTick(function () {
-
+      accessTokens.token = token;
+      accessTokens.tokenSecret = tokenSecret;
       console.log(profile);
-
+      userPro = profile;
       return done(null, profile);
     });
   }
 ));
+
+app.get('/stats', function (req, res) {
+  client = new Fitbit(
+      process.env.KEY,
+      process.env.SECRET,
+      { // Now set with access tokens
+          accessToken: accessTokens.token,
+          accessTokenSecret: accessTokens.tokenSecret,
+          unitMeasure: 'en_GB'
+      }
+  );
+
+  client.getActivities(function (err, activities) {
+    if (err) {
+      res.render('error');
+    }
+    client.getSleep(function (err, sleep) {
+      if (err) res.render('error')
+      res.render('stats', {steps: activities.steps()})
+
+      // res.send('Total steps today: ' + activities.steps() + 'Total distance today: ' + activities.totalDistance()+'sleep: ' +sleep.minutesAsleep() + ' minutes')
+    })
+  })
+
+})
+
+app.get('/activities', function (req, res) {
+  res.send(userPro._json.user)
+})
+
+// expose route
+// send req to route
+//
+// app.get(/activities)
+// res.json(data---the whole user object)
+
+
+
+
 
 
 app.get('/auth/fitbit',
@@ -68,8 +115,27 @@ app.get('/auth/fitbit',
 app.get('/auth/fitbit/callback',
   passport.authenticate('fitbit', { failureRedirect: '/login' }),
   function(req, res) {
-    res.redirect('/');
+    var verifier = req.query.oauth_verifier,
+    client = new Fitbit(process.env.KEY, process.env.SECRET);
+          res.redirect('/stats');
+
+ // Request an access token
+ // client.getAccessToken(
+ //    accessTokens.token,
+ //    accessTokens.tokenSecret,
+ //     verifier,
+ //     function (err, token, secret) {
+ //       if (err) {
+ //         console.log(err);
+ //         return;
+ //       }
+ //       oauthSettings.accessToken = token;
+ //       oauthSettings.accessTokenSecret = secret;
+ //       res.redirect('/stats');
+ //     });
   });
+
+
 
 
 
