@@ -84,7 +84,7 @@ app.get('/stats', function (req, res) {
     }
     client.getSleep(function (err, sleep) {
       if (err) res.render('error')
-      res.send('stats', {steps: activities.steps()})
+      res.render('stats', {steps: activities.steps()})
 
       // res.send('Total steps today: ' + activities.steps() + 'Total distance today: ' + activities.totalDistance()+'sleep: ' +sleep.minutesAsleep() + ' minutes')
     })
