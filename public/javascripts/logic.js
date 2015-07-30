@@ -1,4 +1,3 @@
-
 var stepss=document.getElementById('steps')
 var message=document.getElementById('message')
 
