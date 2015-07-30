@@ -84,7 +84,7 @@ app.get('/stats', function (req, res) {
     }
     client.getSleep(function (err, sleep) {
       if (err) res.render('error')
-      res.render('stats', {steps: activities.steps()})
+      res.send('stats', {steps: activities.steps()})
 
       // res.send('Total steps today: ' + activities.steps() + 'Total distance today: ' + activities.totalDistance()+'sleep: ' +sleep.minutesAsleep() + ' minutes')
     })
@@ -96,11 +96,6 @@ app.get('/activities', function (req, res) {
   res.send(userPro._json.user)
 })
 
-// expose route
-// send req to route
-//
-// app.get(/activities)
-// res.json(data---the whole user object)
 
 
 
@@ -119,20 +114,6 @@ app.get('/auth/fitbit/callback',
     client = new Fitbit(process.env.KEY, process.env.SECRET);
           res.redirect('/stats');
 
- // Request an access token
- // client.getAccessToken(
- //    accessTokens.token,
- //    accessTokens.tokenSecret,
- //     verifier,
- //     function (err, token, secret) {
- //       if (err) {
- //         console.log(err);
- //         return;
- //       }
- //       oauthSettings.accessToken = token;
- //       oauthSettings.accessTokenSecret = secret;
- //       res.redirect('/stats');
- //     });
   });
 
 
